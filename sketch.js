@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 12.12.2024
+ * 12.20.2024
 */
 
 // CONSTANTS
@@ -32,6 +32,7 @@ const BTN_XPOS = MAIN_WIDTH + BTN_PAD;
 const BTN_FONT_SIZE = '18px';
 const HEAD_FONT_SIZE = 18;
 const TEXT_FONT_SIZE = 14;
+const dilation = 1.5;
 // buttons/dropdowns
 let selPollution;
 let btnReset;
@@ -82,7 +83,7 @@ class Organism {
 }
 
 // ORGANISM INFORMATION
-const names = ['Caddisflies', 'Mayflies', 'Stoneflies',  'Riffle Beetles',  'Water Penny', 
+const names = ['Caddisflies', 'Mayflies', 'Stoneflies',  'Riffle Beetles',  'Water Pennies', 
 									 'Dragonflies', 'Craneflies', 'Gill Snails', 'Dobson flies', 'Crayfish',
 									 'Black Flies', 'Midges', 'Worms', 'Lung Snails', 'Leeches', 'Sowbugs'];
 let caddisfly, mayfly, stonefly, riffleBeetle, waterPenny, dragonfly, craneFly, gillSnail;
@@ -123,7 +124,8 @@ function setup() {
 	selPollution.option('None');
 	selPollution.option('Moderate');
 	selPollution.option('High');
-	selPollution.selected('None');
+	pollution = 'None';
+	selPollution.selected(pollution);
 	selPollution.position(BTN_XPOS * W, (BTN_PAD * 4 + BTN_HEIGHT * 4.5) * H)
 	selPollution.style('font-size', BTN_FONT_SIZE/2)
 	selPollution.style('height', BTN_HEIGHT * H + 'px')
@@ -211,6 +213,10 @@ function repaint () {
 				tempAmt = Math.floor(tempAmt);
 				text(tempAmt, W * ((j + 2) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + i * (BOX_HEIGHT + BOX_PAD) + 2 * BOX_PAD));
 				abundance += tempAmt;
+				// species
+				if (o.getAmt() > 0) {
+					species ++;
+				}
 			}
 			// draw 
 			for (let reps = 0; reps < o.getAmt(); reps++) {
@@ -218,10 +224,6 @@ function repaint () {
 				if (state > RUNNING) {
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
 				}
-			}
-			// species
-			if (o.getAmt() > 0) {
-				species ++;
 			}
 		}
 	}
@@ -251,12 +253,13 @@ function go () {
 	pollution = selPollution.selected();
 	if (pollution == 'None' || pollution == 'Moderate' || pollution == 'High') {
 		state = RUNNING;
-		frameRate(5);
+		frameRate(7);
 		btnGo.style('background-color', '#2dc43f');
 		btnOpen.removeAttribute('disabled');
 		setAmts(pollution);
 		setCoords();
 		repaint();
+		selPollution.disable();
 	}
 	return;
 }
@@ -286,6 +289,8 @@ function reset () {
 	btnOpen.style('background-color', null)
 	btnOpen.attribute('disabled', '');
 	btnGo.removeAttribute('disabled');
+	selPollution.enable();
+	selPollution.selected(pollution);
 	for (let o of organisms) { o.resetAmts(); }
 	draw();
 	return;
@@ -308,7 +313,7 @@ function setAmts (pollution) {
 			if (o.getAmt() == 0) {
 				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 3 + 1)); }
 				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
-				else { o.setAmt(Math.floor(Math.random() * 3 + 3)); }
+				else { o.setAmt(Math.floor(Math.random() * 4 + 3)); }
 			}
 		}
 	}
@@ -317,7 +322,7 @@ function setAmts (pollution) {
 			if (o.getAmt() == 0) {
 				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 1.2)); }
 				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3)); }
-				else { o.setAmt(Math.floor(Math.random() * 4 + 4)); }
+				else { o.setAmt(Math.floor(Math.random() * 6 + 4)); }
 			}
 		}
 	}
@@ -337,8 +342,8 @@ function setCoords () {
 		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
 			// old organisms
 			let l = o.getCoords(i);
-			l[0] += Math.random() * 10 - 5;
-			l[1] += Math.random() * 10 - 5;
+			l[0] += Math.random() * 20 - 10;
+			l[1] += Math.random() * 20 - 10;
 			l[0] = Math.max(l[0], W * 2 * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 3 * W * BOX_PAD);
 			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 3 * BOX_HEIGHT - 3 * BOX_PAD));
 			o.setCoords(i, l);
@@ -359,10 +364,10 @@ function setCoords () {
 			let l = o.getBoxCoords(i);
 			l[0] += Math.random() * 10 - 5;
 			l[1] += Math.random() * 10 - 5;
-			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH)); 
-			l[0] = Math.min(l[0], W * ((c - 2) * BOX_PAD + c * BOX_WIDTH));
-			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * r * BOX_HEIGHT + (r + 1) * BOX_PAD); 
-			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * (r + 1) * BOX_HEIGHT + r * BOX_PAD);
+			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH) + 20); 
+			l[0] = Math.min(l[0], W * ((c - 2) * BOX_PAD + c * BOX_WIDTH) - 20);
+			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * r * BOX_HEIGHT + (r + 1) * BOX_PAD + 20); 
+			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * (r + 1) * BOX_HEIGHT + r * BOX_PAD - 20);
 			o.setBoxCoords(i, l);
 		}
 		
@@ -398,7 +403,6 @@ function drawTrap () {
 
 function drawCaddisfly (x, y) {
 	fill('#9b734c');
-	let dilation = 1.75;
 	beginShape();
 	vertex(x + 3 * dilation, y + 20 * dilation);
 	vertex(x + 2 * dilation, y + 17 * dilation);
@@ -429,7 +433,6 @@ function drawCaddisfly (x, y) {
 
 function drawMayfly (x, y) {
 	fill('#a28150');
-	let dilation = 1.75;
 	beginShape();
 	vertex(x + 6 * dilation, y + 5 * dilation);
 	vertex(x + 16.5 * dilation, y + 10 * dilation);
@@ -461,7 +464,6 @@ function drawMayfly (x, y) {
 
 function drawStonefly (x, y) {
 	fill('#5a5145');
-	let dilation = 2;
 	beginShape();
 	vertex(x + 5 * dilation, y + 17 * dilation);
 	vertex(x + 4 * dilation, y + 17 * dilation);
@@ -517,7 +519,6 @@ function drawStonefly (x, y) {
 
 function drawRiffleBeetle (x, y) {
 	fill('#5a5145');
-	let dilation = 2;
 	beginShape();
 	vertex(x + 15 * dilation, y + 8.5 * dilation);
 	vertex(x + 15 * dilation, y + 11.5 * dilation);
@@ -577,7 +578,6 @@ function drawWaterPenny (x, y) {
 
 function drawDragonfly (x, y) {
 	fill('#446c94');
-	let dilation = 2.5;
 	beginShape();
 	vertex(x + dilation * 9.5, y + dilation * 2.5);
 	vertex(x + dilation * 9.25, y + dilation * 3);
@@ -624,7 +624,6 @@ function drawDragonfly (x, y) {
 
 function drawCranefly (x, y) {
 	fill('#705c51');
-	let dilation = 2;
 	beginShape();
 	vertex(x + dilation * 9.5, y + dilation * 9.5);
 	vertex(x + dilation * 9.5, y + dilation * 10.5);
@@ -666,7 +665,6 @@ function drawCranefly (x, y) {
 
 function drawGillSnail (x, y) {
 	fill('#8c3416');
-	let dilation = 2;
 	beginShape();
 	vertex(x + dilation * 5, y + dilation * 15);
 	vertex(x + dilation * 5, y + dilation * 9);
@@ -700,7 +698,6 @@ function drawGillSnail (x, y) {
 
 function drawDobsonfly (x, y) {
 	fill('#e2a657');
-	let dilation = 2;
 	beginShape();
 	vertex(x + dilation * 11, y + dilation * 5);
 	vertex(x + dilation * 11.5, y + dilation * 5.5);
@@ -732,9 +729,170 @@ function drawDobsonfly (x, y) {
 	return;
 }
 
-function drawCrayfish (x, y) {}
+function drawCrayfish (x, y) {
+	// (╯°□°)╯︵ ┻━┻
+	fill('#f85434');
+	beginShape();
+	vertex(x + dilation * 14.66, y + dilation * 18.5);
+	vertex(x + dilation * 14, y + dilation * 18);
+	vertex(x + dilation * 14.33, y + dilation * 17.5);
+	vertex(x + dilation * 14, y + dilation * 16.5);
+	vertex(x + dilation * 12.5, y + dilation * 16);
+	vertex(x + dilation * 12.2, y + dilation * 15.5);
+	vertex(x + dilation * 11.5, y + dilation * 15.2);
+	vertex(x + dilation * 11.5, y + dilation * 14.8);
+	vertex(x + dilation * 10.2, y + dilation * 14.8);
+	vertex(x + dilation * 10, y + dilation * 13.5);
+	vertex(x + dilation * 7.5, y + dilation * 12);
+	vertex(x + dilation * 6, y + dilation * 9);
+	vertex(x + dilation * 5.5, y + dilation * 6.5);
+	vertex(x + dilation * 5, y + dilation * 6);
+	vertex(x + dilation * 5.5, y + dilation * 6);
+	vertex(x + dilation * 5.5, y + dilation * 5);
+	vertex(x + dilation * 7, y + dilation * 6);
+	vertex(x + dilation * 8.5, y + dilation * 7);
+	vertex(x + dilation * 11.5, y + dilation * 8);
+	vertex(x + dilation * 12.5, y + dilation * 12);
+	vertex(x + dilation * 13, y + dilation * 12.2);
+	vertex(x + dilation * 13.2, y + dilation * 13);
+	vertex(x + dilation * 14.2, y + dilation * 13);
+	vertex(x + dilation * 14.5, y + dilation * 14);
+	vertex(x + dilation * 15, y + dilation * 14.2);
+	vertex(x + dilation * 15, y + dilation * 15);
+	vertex(x + dilation * 15.5, y + dilation * 15);
+	vertex(x + dilation * 17.5, y + dilation * 14.8);
+	vertex(x + dilation * 18, y + dilation * 15.5);
+	vertex(x + dilation * 17.5, y + dilation * 17);
+	vertex(x + dilation * 15.5, y + dilation * 18);
+	vertex(x + dilation * 14.66, y + dilation * 18.5);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 8.5, y + dilation * 7);
+	vertex(x + dilation * 8, y + dilation * 5);
+	vertex(x + dilation * 7.5, y + dilation * 3);
+	vertex(x + dilation * 5, y + dilation * 2);
+	vertex(x + dilation * 5, y);
+	vertex(x + dilation * 7, y + dilation * 2.5);
+	vertex(x + dilation * 6.5, y + dilation);
+	vertex(x + dilation * 5, y);
+	vertex(x + dilation * 7.5, y);
+	vertex(x + dilation * 8, y + dilation * 0.5);
+	vertex(x + dilation * 7.5, y + dilation * 3);
+	vertex(x + dilation * 9, y + dilation * 5);
+	vertex(x + dilation * 9, y + dilation * 7.2);
+	vertex(x + dilation * 8.5, y + dilation * 7);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 5.8, y + dilation * 8.5);
+	vertex(x + dilation * 5, y + dilation * 8.5);
+	vertex(x + dilation * 3, y + dilation * 7);
+	vertex(x + dilation * 0.5, y + dilation * 6.5);
+	vertex(x, y + dilation * 6);
+	vertex(x + dilation * 0.5, y + dilation * 3.5);
+	vertex(x + dilation * 1.5, y + dilation * 5.5);
+	vertex(x + dilation * 2.5, y + dilation * 6);
+	vertex(x + dilation * 1, y + dilation * 3.5);
+	vertex(x + dilation * 1.5, y + dilation * 4);
+	vertex(x + dilation * 3.5, y + dilation * 6.5);
+	vertex(x + dilation * 5, y + dilation * 7.5);
+	vertex(x + dilation * 5.5, y + dilation * 7.5);
+	vertex(x + dilation * 5.8, y + dilation * 8.5);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 6, y + dilation * 9);
+	vertex(x + dilation * 5, y + dilation * 10.5);
+	vertex(x + dilation * 2.5, y + dilation * 10);
+	vertex(x + dilation * 5, y + dilation * 11);
+	vertex(x + dilation * 6, y + dilation * 9);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 6.5, y + dilation * 10.5);
+	vertex(x + dilation * 5.5, y + dilation * 12);
+	vertex(x + dilation * 3, y + dilation * 12.5);
+	vertex(x + dilation * 5.5, y + dilation * 12.5);
+	vertex(x + dilation * 6.5, y + dilation * 10.5);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 7, y + dilation * 11.5);
+	vertex(x + dilation * 6.5, y + dilation * 12.5);
+	vertex(x + dilation * 4.5, y + dilation * 14);
+	vertex(x + dilation * 6.5, y + dilation * 13);
+	vertex(x + dilation * 7, y + dilation * 11.5);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 10, y + dilation * 7.33);
+	vertex(x + dilation * 11, y + dilation * 5.5);
+	vertex(x + dilation * 10, y + dilation * 3);
+	vertex(x + dilation * 11.2, y + dilation * 5);
+	vertex(x + dilation * 10, y + dilation * 7.33);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 10.5, y + dilation * 7.66);
+	vertex(x + dilation * 12.5, y + dilation * 5.66);
+	vertex(x + dilation * 12, y + dilation * 3);
+	vertex(x + dilation * 13, y + dilation * 6);
+	vertex(x + dilation * 10.5, y + dilation * 7.66);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 11, y + dilation * 8);
+	vertex(x + dilation * 13, y + dilation * 7.5);
+	vertex(x + dilation * 13.5, y + dilation * 5);
+	vertex(x + dilation * 13.2, y + dilation * 7.5);
+	vertex(x + dilation * 11, y + dilation * 8);
+	endShape(CLOSE);
+	line(x + dilation * 5.5, y + dilation * 5, x + dilation * 10, y + dilation * 3.5);
+	line(x + dilation * 10, y + dilation * 3.5, x + dilation * 15, y + dilation * 4);
+	line(x + dilation * 5, y + dilation * 5.5, x + dilation * 2.5, y + dilation * 10);
+	line(x + dilation * 2.5, y + dilation * 10, x + dilation * 4, y + dilation * 15);
+	return;
+}
 
-function drawBlackfly (x, y) {}
+function drawBlackfly (x, y) {
+	fill('#686464');
+	beginShape();
+	vertex(x + dilation * 10.5, y + dilation * 5);
+	vertex(x + dilation * 11.5, y + dilation * 6.5);
+	vertex(x + dilation * 10.5, y + dilation * 8);
+	vertex(x + dilation * 11.5, y + dilation * 12);
+	vertex(x + dilation * 10.5, y + dilation * 17.5);
+	vertex(x + dilation * 9.5, y + dilation * 17.5);
+	vertex(x + dilation * 8.5, y + dilation * 12);
+	vertex(x + dilation * 9.5, y + dilation * 8);
+	vertex(x + dilation * 8.5, y + dilation * 6.5);
+	vertex(x + dilation * 9.5, y + dilation * 5);
+	vertex(x + dilation * 10.5, y + dilation * 5);
+	endShape();
+	fill('#e0f4fc');
+	beginShape();
+	vertex(x + dilation * 10, y + dilation * 10.5);
+	vertex(x + dilation * 11, y + dilation * 9.5);
+	vertex(x + dilation * 14.5, y + dilation * 12.5);
+	vertex(x + dilation * 14, y + dilation * 16);
+	vertex(x + dilation * 12, y + dilation * 15);
+	vertex(x + dilation * 10, y + dilation * 10.5);
+	endShape();
+	beginShape();
+	vertex(x + dilation * 10, y + dilation * 10.5);
+	vertex(x + dilation * 9, y + dilation * 9.5);
+	vertex(x + dilation * 5.5, y + dilation * 12.5);
+	vertex(x + dilation * 6, y + dilation * 16);
+	vertex(x + dilation * 8, y + dilation * 15);
+	vertex(x + dilation * 10, y + dilation * 10.5);
+	endShape();
+	line(x + dilation * 10.5, y + dilation * 8, x + dilation * 13, y + dilation * 6.5);
+	line(x + dilation * 13, y + dilation * 6.5, x + dilation * 15.5, y + dilation * 6);
+	line(x + dilation * 9.5, y + dilation * 8, x + dilation * 7, y + dilation * 6.5);
+	line(x + dilation * 7, y + dilation * 6.5, x + dilation * 4.5, y + dilation * 6);
+	line(x + dilation * 11, y + dilation * 9.5, x + dilation * 13.5, y + dilation * 8);
+	line(x + dilation * 13.5, y + dilation * 8, x + dilation * 17, y + dilation * 9);
+	line(x + dilation * 9, y + dilation * 9.5, x + dilation * 6.5, y + dilation * 8);
+	line(x + dilation * 6.5, y + dilation * 8, x + dilation * 3, y + dilation * 9);
+	line(x + dilation * 11.5, y + dilation * 10, x + dilation * 13, y + dilation * 10.5);
+	line(x + dilation * 13, y + dilation * 10.5, x + dilation * 15.5, y + dilation * 13);
+	line(x + dilation * 8.5, y + dilation * 10, x + dilation * 7, y + dilation * 10.5);
+	line(x + dilation * 7, y + dilation * 10.5, x + dilation * 4.5, y + dilation * 13);
+	return;
+}
 
 function drawMidge (x, y) {}
 
