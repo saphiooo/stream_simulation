@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 12.12.2024
+ * 12.20.2024
 */
 
 // CONSTANTS
@@ -31,7 +31,7 @@ const BTN_HEIGHT = 0.05;
 const BTN_XPOS = MAIN_WIDTH + BTN_PAD;
 const BTN_FONT_SIZE = '18px';
 const HEAD_FONT_SIZE = 18;
-const TEXT_FONT_SIZE = 16;
+const TEXT_FONT_SIZE = 14;
 // buttons/dropdowns
 let selPollution;
 let btnReset;
@@ -82,7 +82,7 @@ class Organism {
 }
 
 // ORGANISM INFORMATION
-const names = ['Caddisflies', 'Mayflies', 'Stoneflies',  'Riffle Beetles',  'Water Penny Beetles', 
+const names = ['Caddisflies', 'Mayflies', 'Stoneflies',  'Riffle Beetles',  'Water Penny', 
 									 'Dragonflies', 'Craneflies', 'Gill Snails', 'Dobson flies', 'Crayfish',
 									 'Black Flies', 'Midges', 'Worms', 'Lung Snails', 'Leeches', 'Sowbugs'];
 let caddisfly, mayfly, stonefly, riffleBeetle, waterPenny, dragonfly, craneFly, gillSnail;
@@ -159,9 +159,8 @@ function setup() {
 // DRAW
 function draw() {
 	if (state == TRAP_OPEN) {
-		 time += 1;
-		if (time == 60) {
-			frameRate(0);
+		if (time < 15) {
+			time ++;
 		}
 	}
 	repaint();
@@ -174,17 +173,6 @@ function repaint () {
 	// essentials
 	background(255);
 	
-	// side panel indicators
-	textSize(HEAD_FONT_SIZE);
-	fill(0);
-	text('Pollution', BTN_XPOS * W, (BTN_PAD * 4 + BTN_HEIGHT * 4) * H);
-	text('Sampling Time', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 6.5) * H);
-	text('Total Species', BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 8.5) * H);
-	text('Abundance', BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 10.5) * H);
-	textSize(TEXT_FONT_SIZE);
-	text(time + ' minutes', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.5) * H);
-	text(species, BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 9.5) * H);
-	text(abundance, BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 11.5) * H);
 	// simulation boxes
 	fill('#385cac');
 	rect(W * BOX_PAD, H * BTN_PAD, W * MAIN_WIDTH, H * MAIN_HEIGHT, BOX_CORNER);
@@ -206,21 +194,46 @@ function repaint () {
 		setCoords();
 		for (let idx = 0; idx < 16; idx++) {
 			o = organisms[idx];
+			i = o.box[0] + 1; j = o.box[1] + 1;
+			// text
+			if (state > RUNNING) {
+				fill(0);
+				textSize(TEXT_FONT_SIZE + 5);
+				let tempAmt = o.getAmt();
+				const multipliers = [1.25, 1.5, 2];
+				tempAmt *= multipliers[Math.floor(Math.random() + 1)];
+				tempAmt = Math.floor(tempAmt);
+				text(tempAmt, W * ((j + 2) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + i * (BOX_HEIGHT + BOX_PAD) + 2 * BOX_PAD));
+				abundance += tempAmt;
+			}
+			// draw 
 			for (let reps = 0; reps < o.getAmt(); reps++) {
 				o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
 				if (state > RUNNING) {
-					i = o.box[0] + 2; j = o.box[1] + 1;
-					// o.display(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH + BOX_WIDTH/2.5) + Math.random() * 10 - 5, 
-										// H * (MAIN_HEIGHT - i * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT/4) + Math.random() * 5 - 2);
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
 				}
 			}
 		}
 	}
 	
+	// trap
 	if (state > RUNNING) {
 		drawTrap();
 	}
+	
+	// side panel indicators
+	textSize(HEAD_FONT_SIZE);
+	fill(0);
+	text('Pollution', BTN_XPOS * W, (BTN_PAD * 4 + BTN_HEIGHT * 4) * H);
+	text('Sampling Time', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 6.5) * H);
+	text('Total Species', BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 8.5) * H);
+	text('Abundance', BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 10.5) * H);
+	textSize(TEXT_FONT_SIZE);
+	text(time + ' minutes', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.5) * H);
+	text(species, BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 9.5) * H);
+	text(abundance, BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 11.5) * H);
+	abundance = 0;
+	
 	return;
 }
 
@@ -263,7 +276,6 @@ function reset () {
 	species = 0;
 	abundance = 0;
 	frameRate(0);
-	selPollution.selected('None');
 	btnGo.style('background-color', null);
 	btnOpen.style('background-color', null)
 	btnOpen.attribute('disabled', '');
@@ -279,8 +291,8 @@ function setAmts (pollution) {
 	if (pollution == 'None') {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
-				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
-				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1 + 2)); }
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 3 + 3)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
 				else { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
 			}			
 		}
@@ -288,18 +300,18 @@ function setAmts (pollution) {
 	else if (pollution == 'Moderate') {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
-				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 1 + 1)); }
-				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1 + 1)); }
-				else { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 3 + 1)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
+				else { o.setAmt(Math.floor(Math.random() * 3 + 3)); }
 			}
 		}
 	}
 	else if (pollution == 'High') {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
-				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random())); }
-				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1)); }
-				else { o.setAmt(Math.floor(Math.random() * 2 + 4)); }
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 1.2)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3)); }
+				else { o.setAmt(Math.floor(Math.random() * 4 + 4)); }
 			}
 		}
 	}
@@ -321,15 +333,15 @@ function setCoords () {
 			let l = o.getCoords(i);
 			l[0] += Math.random() * 10 - 5;
 			l[1] += Math.random() * 10 - 5;
-			l[0] = Math.max(l[0], W * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 1.5 * W * BOX_PAD);
-			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 2.5 * BOX_HEIGHT - 2 * BOX_PAD));
+			l[0] = Math.max(l[0], W * 2 * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 3 * W * BOX_PAD);
+			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 3 * BOX_HEIGHT - 3 * BOX_PAD));
 			o.setCoords(i, l);
 		}
 		
 		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
 			// new organisms
 			let x = Math.random() * W * MAIN_WIDTH + W * BOX_PAD;
-			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT + BTN_PAD);
+			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
 			o.addCoords([x, y]);
 			console.log(o.coords);
 		}
@@ -342,10 +354,12 @@ function setCoords () {
 			l[0] += Math.random() * 10 - 5;
 			l[1] += Math.random() * 10 - 5;
 			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH)); 
-			l[0] = Math.min(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH + BOX_WIDTH));
+			l[0] = Math.min(l[0], W * ((c - 2) * BOX_PAD + c * BOX_WIDTH));
 			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD)); 
-			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT));
+			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) - BTN_PAD + BOX_HEIGHT));
 			o.setBoxCoords(i, l);
+			//rect(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT - i * (BOX_HEIGHT + BOX_PAD) + BTN_PAD), W * BOX_WIDTH, H * BOX_HEIGHT, BOX_CORNER);
+			
 		}
 		
 		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
