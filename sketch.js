@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 10.02.2024
+ * 12.12.2024
 */
 
 // CONSTANTS
@@ -45,25 +45,49 @@ const TRAP_OPEN = 2;
 let state = STOPPED;
 
 // CLASSES
-// class Organism {
-// 	// constructor
-// 	constructor (name, id, sensitivity) {
-// 		this.name = name;
-// 		this.id = id;
-// 		this.sensitivity = sensitivity;
-// 	}
-// 	// getters
-// 	name () { return this.name; }
-// 	id () { return this.id; }
-// 	sensitivity () { return this.sensitivity; }
-// }
+class Organism {
+	// constructor
+	constructor (name, sensitivity, display, i) {
+		this.name = name;
+		this.sensitivity = sensitivity;
+		this.display = display;
+		this.amt = 0;
+		this.coords = [];
+		this.boxCoords = [];
+		this.box = [int(i/8), i%8];
+	}
+	// getters
+	getName () { return this.name; }
+	getAmt () { return this.amt; }
+	getSensitivity () { return this.sensitivity; }
+	getLenCoords () { return this.coords.length; }
+	getCoords (i) { 
+		if (this.coords.length <= i) { return [0, 0]; }
+		else { return this.coords[i]; }
+	}
+	getLenBoxCoords () { return this.boxCoords.length; }
+	getBoxCoords (i) {
+		if (this.boxCoords.length <= i) { return [0, 0]; }
+		return this.boxCoords[i];
+	}
+	drawOrganism (x, y) {return this.display(x, y); }
+	// setters
+	setAmt (a) { this.amt = a; return; }
+	setCoords (i, l) { this.coords[i] = l; return; }
+	addCoords (l) { this.coords.push(l); return; }
+	setBoxCoords (i, l) { this.boxCoords[i] = l; return; }
+	addBoxCoords (l) { this.boxCoords.push(l); return; }
+	// resetters
+	resetAmts () { this.amt = 0; this.coords = []; this.boxCoords = []; return; }
+}
 
 // ORGANISM INFORMATION
-const organisms = [['Caddisflies', 0], ['Mayflies', 0], ['Stoneflies', 0], ['Riffle Beetles', 0], ['Water Penny Beetles', 0],
-									['Dragonflies', 1], ['Craneflies', 1], ['Gill Snails', 1], ['Dobson flies', 1], ['Crayfish', 1],
-									['Black Flies', 2], ['Midges', 2], ['Worms', 2], ['Lung Snails', 2], ['Leeches', 2], ['Sowbugs', 2]];
+const names = ['Caddisflies', 'Mayflies', 'Stoneflies',  'Riffle Beetles',  'Water Penny Beetles', 
+									 'Dragonflies', 'Craneflies', 'Gill Snails', 'Dobson flies', 'Crayfish',
+									 'Black Flies', 'Midges', 'Worms', 'Lung Snails', 'Leeches', 'Sowbugs'];
 let caddisfly, mayfly, stonefly, riffleBeetle, waterPenny, dragonfly, craneFly, gillSnail;
 let dobsonfly, crayfish, blackfly, midge, worm, lungsnail, leech, sowbug;
+let organisms;
 
 // SETUP
 function setup() {
@@ -105,6 +129,28 @@ function setup() {
 	selPollution.style('height', BTN_HEIGHT * H + 'px')
 	selPollution.style('width', BTN_WIDTH * W + 'px')
 	
+	// organisms
+	caddisfly = new Organism('Caddisfly', 2, drawCaddisfly, 0);
+	mayfly = new Organism('Mayfly', 2, drawMayfly, 1);
+	stonefly = new Organism('Stonefly', 2, drawStonefly, 2);
+	riffleBeetle = new Organism('Riffle Beetle', 2, drawRiffleBeetle, 3)
+	waterPenny = new Organism('Water Penny', 2, drawWaterPenny, 4);
+	dragonfly = new Organism('Dragonfly', 1, drawDragonfly, 5);
+	cranefly = new Organism('Crane fly', 1, drawCranefly, 6);
+	gillSnail = new Organism('Gill snail', 1, drawGillSnail, 7);
+	dobsonfly = new Organism('Dobson fly', 1, drawDobsonfly, 8);
+	crayfish = new Organism('Crayfish', 1, drawCrayfish, 9);
+	blackfly = new Organism('Black fly', 0, drawBlackfly, 10);
+	midge = new Organism('Midge', 0, drawMidge, 11);
+	worm = new Organism('Worm', 0, drawWorm, 12);
+	lungSnail = new Organism('Lung Snail', 0, drawLungSnail, 13);
+	leech = new Organism('Leech', 0, drawLeech, 14);
+	sowbug = new Organism('Sowbug', 0, drawSowbug, 15);
+
+	organisms = [caddisfly, mayfly, stonefly, riffleBeetle, waterPenny,
+										 dragonfly, cranefly, gillSnail, dobsonfly, crayfish,
+										 blackfly, midge, worm, lungSnail, leech, sowbug];
+	
 	repaint();
 	
 	return;
@@ -119,9 +165,6 @@ function draw() {
 		}
 	}
 	repaint();
-	drawCaddisfly(50, 50);
-	drawMayfly(100, 100);
-	drawStonefly(100, 60);
 	return;
 }
 
@@ -155,13 +198,30 @@ function repaint () {
 			rect(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + (i - 1) * (BOX_HEIGHT + BOX_PAD) + 2 * BTN_PAD), W * BOX_WIDTH, H * BOX_HEIGHT, BOX_CORNER);
 			fill(0);
 			textSize(TEXT_FONT_SIZE);
-			text(organisms[8 * (i - 1) + j - 1][0], W * ((j + 1.5) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + i * (BOX_HEIGHT + BOX_PAD) - 0.4 * BTN_PAD));
+			text(names[8 * (i - 1) + j - 1], W * ((j + 1.5) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + i * (BOX_HEIGHT + BOX_PAD) - 0.4 * BTN_PAD));
+		}
+	}
+	
+	if (state >= RUNNING) {
+		setCoords();
+		for (let idx = 0; idx < 16; idx++) {
+			o = organisms[idx];
+			for (let reps = 0; reps < o.getAmt(); reps++) {
+				o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
+				if (state > RUNNING) {
+					i = o.box[0] + 2; j = o.box[1] + 1;
+					// o.display(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH + BOX_WIDTH/2.5) + Math.random() * 10 - 5, 
+										// H * (MAIN_HEIGHT - i * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT/4) + Math.random() * 5 - 2);
+					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
+				}
+			}
 		}
 	}
 	
 	if (state > RUNNING) {
 		drawTrap();
 	}
+	return;
 }
 
 
@@ -172,8 +232,12 @@ function go () {
 	pollution = selPollution.selected();
 	if (pollution == 'None' || pollution == 'Moderate' || pollution == 'High') {
 		state = RUNNING;
+		frameRate(5);
 		btnGo.style('background-color', '#2dc43f');
 		btnOpen.removeAttribute('disabled');
+		setAmts(pollution);
+		setCoords();
+		repaint();
 	}
 	return;
 }
@@ -184,7 +248,6 @@ function openTrap () {
 	if (state == RUNNING) {
 		state = TRAP_OPEN;
 		drawTrap();
-		frameRate(15);
 		btnGo.style('background-color', null);
 		btnGo.attribute('disabled', '');
 		btnOpen.style('background-color', '#2dc43f');
@@ -205,7 +268,93 @@ function reset () {
 	btnOpen.style('background-color', null)
 	btnOpen.attribute('disabled', '');
 	btnGo.removeAttribute('disabled');
+	for (let o of organisms) { o.resetAmts(); }
 	draw();
+	return;
+}
+
+// RANDOMIZATION
+// amounts
+function setAmts (pollution) {
+	if (pollution == 'None') {
+		for (let o of organisms) {
+			if (o.getAmt() == 0) {
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1 + 2)); }
+				else { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+			}			
+		}
+	}
+	else if (pollution == 'Moderate') {
+		for (let o of organisms) {
+			if (o.getAmt() == 0) {
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 1 + 1)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1 + 1)); }
+				else { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+			}
+		}
+	}
+	else if (pollution == 'High') {
+		for (let o of organisms) {
+			if (o.getAmt() == 0) {
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random())); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 1)); }
+				else { o.setAmt(Math.floor(Math.random() * 2 + 4)); }
+			}
+		}
+	}
+	else {
+		for (let o of organisms) {
+			o.setAmt(0);
+		}
+	}
+	return;
+}
+
+// coordinates
+function setCoords () {
+	for (let o of organisms) {
+		// simulation coords
+		let diff = o.getAmt() - o.getLenCoords();
+		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
+			// old organisms
+			let l = o.getCoords(i);
+			l[0] += Math.random() * 10 - 5;
+			l[1] += Math.random() * 10 - 5;
+			l[0] = Math.max(l[0], W * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 1.5 * W * BOX_PAD);
+			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 2.5 * BOX_HEIGHT - 2 * BOX_PAD));
+			o.setCoords(i, l);
+		}
+		
+		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
+			// new organisms
+			let x = Math.random() * W * MAIN_WIDTH + W * BOX_PAD;
+			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT + BTN_PAD);
+			o.addCoords([x, y]);
+			console.log(o.coords);
+		}
+		// box coords
+		diff = o.getAmt() - o.getLenBoxCoords();
+		let r = o.box[0] + 2; c = o.box[1] + 1;
+		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
+			// old organisms
+			let l = o.getBoxCoords(i);
+			l[0] += Math.random() * 10 - 5;
+			l[1] += Math.random() * 10 - 5;
+			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH)); 
+			l[0] = Math.min(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH + BOX_WIDTH));
+			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD)); 
+			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT));
+			o.setBoxCoords(i, l);
+		}
+		
+		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
+			// new organisms
+			let x = W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH + BOX_WIDTH/2) + Math.random() * W * BOX_WIDTH - W * BOX_WIDTH/2;
+			let y = H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT/2) + Math.random() * H * BOX_HEIGHT - H * BOX_HEIGHT/2;
+			o.addBoxCoords([x, y]);
+		}
+	}
 	return;
 }
 
@@ -226,11 +375,12 @@ function drawTrap () {
 	line(w - 30, h, w + 30, h);
 	line(w - 30, h - 30, w + 30, h - 20);
 	line(w - 30, h + 30, w + 30, h + 20);
+	return;
 }
 
 function drawCaddisfly (x, y) {
 	fill('#9b734c');
-	let dilation = 2;
+	let dilation = 1.75;
 	beginShape();
 	vertex(x + 3 * dilation, y + 20 * dilation);
 	vertex(x + 2 * dilation, y + 17 * dilation);
@@ -256,11 +406,12 @@ function drawCaddisfly (x, y) {
 	vertex(x + 12.5 * dilation, y + 12 * dilation);
 	vertex(x + 9 * dilation, y + 17.5 * dilation);
 	endShape(CLOSE);
+	return;
 }
 
 function drawMayfly (x, y) {
 	fill('#a28150');
-	let dilation = 2;
+	let dilation = 1.75;
 	beginShape();
 	vertex(x + 6 * dilation, y + 5 * dilation);
 	vertex(x + 16.5 * dilation, y + 10 * dilation);
@@ -287,6 +438,7 @@ function drawMayfly (x, y) {
 	vertex(x + 10 * dilation, y + 15 * dilation);
 	vertex(x + 7 * dilation, y + 11 * dilation);
 	endShape(CLOSE);
+	return;
 }
 
 function drawStonefly (x, y) {
@@ -342,4 +494,204 @@ function drawStonefly (x, y) {
 	vertex(x + 6 * dilation, y + 13 * dilation);
 	vertex(x + 6.5 * dilation, y + 15 * dilation);
 	endShape(CLOSE);
+	return;
 }
+
+function drawRiffleBeetle (x, y) {
+	fill('#5a5145');
+	let dilation = 2;
+	beginShape();
+	vertex(x + 15 * dilation, y + 8.5 * dilation);
+	vertex(x + 15 * dilation, y + 11.5 * dilation);
+	vertex(x + 12.5 * dilation, y + 12.5 * dilation);
+	vertex(x + 12 * dilation, y + 12.5 * dilation);
+	vertex(x + 12 * dilation, y + 15 * dilation);
+	vertex(x + 14 * dilation, y + 17.5 * dilation);
+	vertex(x + 12 * dilation, y + 15 * dilation);
+	vertex(x + 12 * dilation, y + 12.5 * dilation);
+	vertex(x + 7.5 * dilation, y + 12.5 * dilation);
+	vertex(x + 8 * dilation, y + 17.5 * dilation);
+	vertex(x + 7.5 * dilation, y + 12.5 * dilation);
+	vertex(x + 7 * dilation, y + 11.5 * dilation);
+	vertex(x + 5 * dilation, y + 14 * dilation);
+	vertex(x + 2.5 * dilation, y + 14 * dilation);
+	vertex(x + 5 * dilation, y + 14 * dilation);
+	vertex(x + 7 * dilation, y + 11.5 * dilation);
+	vertex(x + 5 * dilation, y + 11.5 * dilation);
+	vertex(x + 4 * dilation, y + 10.5 * dilation);
+	vertex(x + 2.5 * dilation, y + 11.5 * dilation);
+	vertex(x, y + 11.5 * dilation);
+	vertex(x + 2.5 * dilation, y + 11.5 * dilation);
+	vertex(x + 4 * dilation, y + 10.5 * dilation);
+	vertex(x + 4 * dilation, y + 9.5 * dilation);
+	vertex(x + 2.5 * dilation, y + 8.5 * dilation);
+	vertex(x, y + 8.5 * dilation);
+	vertex(x + 2.5 * dilation, y + 8.5 * dilation);
+	vertex(x + 4 * dilation, y + 9.5 * dilation);
+	vertex(x + 5 * dilation, y + 8.5 * dilation);
+	vertex(x + 7 * dilation, y + 8.5 * dilation);
+	vertex(x + 5 * dilation, y + 6 * dilation);
+	vertex(x + 2.5 * dilation, y + 6 * dilation);
+	vertex(x + 5 * dilation, y + 6 * dilation);
+	vertex(x + 7 * dilation, y + 8.5 * dilation);
+	vertex(x + 7.5 * dilation, y + 7.5 * dilation);
+	vertex(x + 8 * dilation, y + 2.5 * dilation);
+	vertex(x + 7.5 * dilation, y + 7.5 * dilation);
+	vertex(x + 12 * dilation, y + 7.5 * dilation);
+	vertex(x + 12 * dilation, y + 5 * dilation);
+	vertex(x + 14 * dilation, y + 2.5 * dilation);
+	vertex(x + 12 * dilation, y + 5 * dilation);
+	vertex(x + 12 * dilation, y + 7.5 * dilation);
+	vertex(x + 12.5 * dilation, y + 7.5 * dilation);
+	vertex(x + 15 * dilation, y + 8.5 * dilation);
+	endShape(CLOSE);
+	return;
+}
+
+function drawWaterPenny (x, y) {
+	x += 19; y += 10;
+	fill('#7c3622');
+	ellipse(x, y, 20, 16);
+	line(x - 9.5, y + 0.5, x - 15, y + 2.5);
+	line(x - 9.5, y - 0.5, x - 15, y - 2.5);
+	return;
+}
+
+function drawDragonfly (x, y) {
+	fill('#446c94');
+	let dilation = 2.5;
+	beginShape();
+	vertex(x + dilation * 9.5, y + dilation * 2.5);
+	vertex(x + dilation * 9.25, y + dilation * 3);
+	vertex(x + dilation * 9.5, y + dilation * 3.5);
+	vertex(x + dilation * 9, y + dilation * 5);
+	vertex(x + dilation * 9.5, y + dilation * 7);
+	vertex(x + dilation * 9, y + dilation * 12.5);
+	vertex(x + dilation * 9.5, y + dilation * 17.5);
+	vertex(x + dilation * 10.5, y + dilation * 17.5);
+	vertex(x + dilation * 11, y + dilation * 12.5);
+	vertex(x + dilation * 10.5, y + dilation * 7);
+	vertex(x + dilation * 11, y + dilation * 5);
+	vertex(x + dilation * 10.5, y + dilation * 3.5);
+	vertex(x + dilation * 10.75, y + dilation * 3);
+	vertex(x + dilation * 10.5, y + dilation * 2.5);
+	endShape(CLOSE);
+	fill('#add5dd');
+	beginShape();
+	vertex(x + dilation * 9, y + dilation * 5);
+	vertex(x + dilation * 5, y + dilation * 5);
+	vertex(x + dilation * 2, y + dilation * 5.75);
+	vertex(x + dilation * 2, y + dilation * 6.25);
+	vertex(x + dilation * 5, y + dilation * 7.5);
+	vertex(x + dilation * 4.5, y + dilation * 10);
+	vertex(x + dilation * 5, y + dilation * 11);
+	vertex(x + dilation * 5.5, y + dilation * 10.5);
+	vertex(x + dilation * 9.5, y + dilation * 7);
+	vertex(x + dilation * 9, y + dilation * 5);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 11, y + dilation * 5);
+	vertex(x + dilation * 15, y + dilation * 5);
+	vertex(x + dilation * 18, y + dilation * 5.75);
+	vertex(x + dilation * 18, y + dilation * 6.25);
+	vertex(x + dilation * 15, y + dilation * 7.5);
+	vertex(x + dilation * 15.5, y + dilation * 10);
+	vertex(x + dilation * 15, y + dilation * 11);
+	vertex(x + dilation * 14.5, y + dilation * 10.5);
+	vertex(x + dilation * 10.5, y + dilation * 7);
+	vertex(x + dilation * 11, y + dilation * 5);
+	endShape(CLOSE);
+	return;
+}
+
+function drawCranefly (x, y) {
+	fill('#705c51');
+	let dilation = 2;
+	beginShape();
+	vertex(x + dilation * 9.5, y + dilation * 9.5);
+	vertex(x + dilation * 9.5, y + dilation * 10.5);
+	vertex(x + dilation * 6.5, y + dilation * 13.5);
+	vertex(x + dilation * 6, y + dilation * 15);
+	vertex(x + dilation * 8, y + dilation * 13.75);
+	vertex(x + dilation * 9.5, y + dilation * 10.75);
+	vertex(x + dilation * 9.5, y + dilation * 14);
+	vertex(x + dilation * 9.85, y + dilation * 15);
+	vertex(x + dilation * 10.15, y + dilation * 15);
+	vertex(x + dilation * 10.5, y + dilation * 14);
+	vertex(x + dilation * 10.5, y + dilation * 10.75);
+	vertex(x + dilation * 12, y + dilation * 13.75);
+	vertex(x + dilation * 14, y + dilation * 15);
+	vertex(x + dilation * 13.5, y + dilation * 13.5);
+	vertex(x + dilation * 10.5, y + dilation * 10.5);
+	vertex(x + dilation * 10.5, y + dilation * 9.5);
+	endShape();
+	line(x + dilation * 9.5, y + dilation * 10.5, x + dilation * 9, y + dilation * 10);
+	line(x + dilation * 9, y + dilation * 10, x + dilation * 7, y + dilation * 5);
+	line(x + dilation * 7, y + dilation * 5, x + dilation * 6, y);
+	line(x + dilation * 10.5, y + dilation * 10.5, x + dilation * 11, y + dilation * 10);
+	line(x + dilation * 11, y + dilation * 10, x + dilation * 13, y + dilation * 5);
+	line(x + dilation * 13, y + dilation * 5, x + dilation * 14, y);
+	line(x + dilation * 9.5, y + dilation * 10.5, x + dilation * 7, y + dilation * 11.5);
+	line(x + dilation * 7, y + dilation * 11.5, x + dilation * 4, y + dilation * 10);
+	line(x + dilation * 4, y + dilation * 10, x + dilation * 0.5, y + dilation * 11);
+	line(x + dilation * 10.5, y + dilation * 10.5, x + dilation * 13, y + dilation * 11.5);
+	line(x + dilation * 13, y + dilation * 11.5, x + dilation * 16, y + dilation * 10);
+	line(x + dilation * 16, y + dilation * 10, x + dilation * 19.5, y + dilation * 11);
+	line(x + dilation * 9.5, y + dilation * 10.5, x + dilation * 8.5, y + dilation * 15);
+	line(x + dilation * 8.5, y + dilation * 15, x + dilation * 5.5, y + dilation * 17);
+	line(x + dilation * 5.5, y + dilation * 17, x + dilation * 5, y + dilation * 20);
+	line(x + dilation * 10.5, y + dilation * 10.5, x + dilation * 11.5, y + dilation * 15);
+	line(x + dilation * 11.5, y + dilation * 15, x + dilation * 14.5, y + dilation * 17);
+	line(x + dilation * 14.5, y + dilation * 17, x + dilation * 15, y + dilation * 20);
+	return;
+}
+
+function drawGillSnail (x, y) {
+	fill('#8c3416');
+	let dilation = 2;
+	beginShape();
+	vertex(x + dilation * 5, y + dilation * 15);
+	vertex(x + dilation * 5, y + dilation * 9);
+	vertex(x + dilation * 8, y + dilation * 6);
+	vertex(x + dilation * 12, y + dilation * 6);
+	vertex(x + dilation * 15, y + dilation * 9);
+	vertex(x + dilation * 15, y + dilation * 13.5);
+	vertex(x + dilation * 13, y + dilation * 18);
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	vertex(x + dilation * 5, y + dilation * 15);
+	endShape(CLOSE);
+	fill('#ecdc74');
+	beginShape();
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	vertex(x + dilation * 2, y + dilation * 15);
+	vertex(x, y + dilation * 18.5);
+	vertex(x + dilation * 9, y + dilation * 18.5);
+	vertex(x + dilation * 13, y + dilation * 18.5);
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	endShape(CLOSE);
+	line(x + dilation * 8.5, y + dilation * 15.5, x + dilation * 13, y + dilation * 11.5);
+	line(x + dilation * 13, y + dilation * 11.5, x + dilation * 10, y + dilation * 8.5);
+	line(x + dilation * 10, y + dilation * 8.5, x + dilation * 7.5, y + dilation * 9);
+	line(x + dilation * 7.5, y + dilation * 9, x + dilation * 7.75, y + dilation * 12);
+	line(x + dilation * 7.75, y + dilation * 12, x + dilation * 9, y + dilation * 13);
+	line(x + dilation * 9, y + dilation * 13, x + dilation * 10, y + dilation * 11);
+	line(x + dilation * 10, y + dilation * 11, x + dilation * 9, y + dilation * 10);
+	line(x + dilation * 9, y + dilation * 10, x + dilation * 8.75, y + dilation * 11);
+	return;
+}
+
+function drawDobsonfly (x, y) {}
+
+function drawCrayfish (x, y) {}
+
+function drawBlackfly (x, y) {}
+
+function drawMidge (x, y) {}
+
+function drawWorm (x, y) {}
+
+function drawLungSnail (x, y) {}
+
+function drawLeech (x, y) {}
+
+function drawSowbug (x, y) {}
