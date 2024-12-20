@@ -176,15 +176,18 @@ function repaint () {
 	background(255);
 	
 	// simulation boxes
-	if (pollution == 'None') { fill('#385cac'); }
-	else if (pollution == 'Moderate') { fill('#3c54a4'); }
-	else { fill('#2a3e52'); }
+	if (pollution == 'None') { fill('#6489DB'); }
+	else if (pollution == 'Moderate') { fill('#5163A0'); }
+	else { fill('#364570'); }
 	rect(W * BOX_PAD, H * BTN_PAD, W * MAIN_WIDTH, H * MAIN_HEIGHT, BOX_CORNER);
 	fill(0);
 	rect (W * BOX_PAD, H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - 0.5 * BTN_PAD), W * MAIN_WIDTH, H * (2 * BOX_HEIGHT + 3 * BOX_PAD + 0.5 * BTN_PAD), 0, 0, BOX_CORNER, BOX_CORNER);
 	for (let i = 2; i >= 1; i--) {
 		for (let j = 1; j <= 8; j++) {
-			fill('#93b4f5');
+			// fill('#93b4f5');
+			if (pollution == 'None') { fill('#8CA9E9'); }
+			else if (pollution == 'Moderate') { fill('#687BBA'); }
+			else { fill('#4F638F'); }
 			rect(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT - i * (BOX_HEIGHT + BOX_PAD) + BTN_PAD), W * BOX_WIDTH, H * BOX_HEIGHT, BOX_CORNER);
 			fill('#fffc9c')
 			rect(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT + (i - 1) * (BOX_HEIGHT + BOX_PAD) + 2 * BTN_PAD), W * BOX_WIDTH, H * BOX_HEIGHT, BOX_CORNER);
@@ -221,7 +224,7 @@ function repaint () {
 				}
 			}
 			// draw 
-			for (let reps = 0; reps < o.getAmt(); reps++) {
+			for (let reps = 0; reps < o.getAmt(); reps += 2) {
 				o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
 				if (state > RUNNING) {
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
@@ -255,7 +258,7 @@ function go () {
 	pollution = selPollution.selected();
 	if (pollution == 'None' || pollution == 'Moderate' || pollution == 'High') {
 		state = RUNNING;
-		frameRate(7);
+		frameRate(3);
 		btnGo.style('background-color', '#2dc43f');
 		btnOpen.removeAttribute('disabled');
 		setAmts(pollution);
@@ -344,8 +347,8 @@ function setCoords () {
 		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
 			// old organisms
 			let l = o.getCoords(i);
-			l[0] += Math.random() * 20 - 10;
-			l[1] += Math.random() * 20 - 10;
+			l[0] += Math.random() * 60 - 30;
+			l[1] += Math.random() * 60 - 30;
 			l[0] = Math.max(l[0], W * 2 * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 3 * W * BOX_PAD);
 			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 3 * BOX_HEIGHT - 3 * BOX_PAD));
 			o.setCoords(i, l);
@@ -896,12 +899,132 @@ function drawBlackfly (x, y) {
 	return;
 }
 
-function drawMidge (x, y) {}
+function drawMidge (x, y) {
+	fill('#674f3c');
+	beginShape();
+	vertex(x + dilation * 6.5, y + dilation * 8.5);
+	vertex(x + dilation * 7.5, y + dilation * 8);
+	vertex(x + dilation * 12.5, y + dilation * 8);
+	vertex(x + dilation * 17.5, y + dilation * 9.5);
+	vertex(x + dilation * 17.5, y + dilation * 10.5);
+	vertex(x + dilation * 12.5, y + dilation * 12);
+	vertex(x + dilation * 7.5, y + dilation * 12);
+	vertex(x + dilation * 6.5, y + dilation * 11.5)
+	vertex(x + dilation * 6.5, y + dilation * 8.5);
+	endShape(CLOSE);
+	fill('#dacebc');
+	beginShape();
+	vertex(x + dilation * 7.5, y + dilation * 8);
+	vertex(x + dilation * 12, y + dilation * 7);
+	vertex(x + dilation * 14.5, y + dilation * 7);
+	vertex(x + dilation * 14.5, y + dilation * 8);
+	vertex(x + dilation * 12.5, y + dilation * 9);
+	vertex(x + dilation * 7.5, y + dilation * 10);
+	vertex(x + dilation * 7.5, y + dilation * 8);
+	endShape(CLOSE);
+	beginShape();
+	vertex(x + dilation * 7.5, y + dilation * 12);
+	vertex(x + dilation * 12, y + dilation * 13);
+	vertex(x + dilation * 14.5, y + dilation * 13);
+	vertex(x + dilation * 14.5, y + dilation * 12);
+	vertex(x + dilation * 12.5, y + dilation * 11);
+	vertex(x + dilation * 7.5, y + dilation * 10);
+	vertex(x + dilation * 7.5, y + dilation * 12);
+	endShape(CLOSE);
+	line(x + dilation * 7.5, y + dilation * 8, x + dilation * 2.5, y + dilation * 7.5);
+	line(x + dilation * 2.5, y + dilation * 7.5, x, y + dilation * 6.5);
+	line(x + dilation * 7.5, y + dilation * 12, x + dilation * 2.5, y + dilation * 12.5);
+	line(x + dilation * 2.5, y + dilation * 12.5, x, y + dilation * 13.5);
+	line(x + dilation * 7.5, y + dilation * 8, x + dilation * 8.5, y + dilation * 6.5);
+	line(x + dilation * 8.5, y + dilation * 6.5, x + dilation * 6.5, y + dilation * 5);
+	line(x + dilation * 6.5, y + dilation * 5, x + dilation * 5, y + dilation * 2.5);
+	line(x + dilation * 7.5, y + dilation * 12, x + dilation * 8.5, y + dilation * 13.5);
+	line(x + dilation * 8.5, y + dilation * 13.5, x + dilation * 6.5, y + dilation * 15);
+	line(x + dilation * 6.5, y + dilation * 15, x + dilation * 5, y + dilation * 17.5);
+	line(x + dilation * 7.5, y + dilation * 8, x + dilation * 12.5, y + dilation * 7);
+	line(x + dilation * 12.5, y + dilation * 7, x + dilation * 15, y + dilation * 3);
+	line(x + dilation * 7.5, y + dilation * 12, x + dilation * 12.5, y + dilation * 13);
+	line(x + dilation * 12.5, y + dilation * 13, x + dilation * 15, y + dilation * 17);
+	return 0;
+}
 
-function drawWorm (x, y) {}
+function drawWorm (x, y) {
+	fill('#C68994');
+	beginShape();
+	vertex(x + dilation * 7.5, y + dilation * 18);
+	vertex(x + dilation * 10, y + dilation * 17);
+	vertex(x + dilation * 12, y + dilation * 15);
+	vertex(x + dilation * 12, y + dilation * 13);
+	vertex(x + dilation * 10, y + dilation * 12.5);
+	vertex(x + dilation * 7.5, y + dilation * 12.4);
+	vertex(x + dilation * 5, y + dilation * 11.5);
+	vertex(x + dilation * 3, y + dilation * 10);
+	vertex(x + dilation * 2.5, y + dilation * 7.5);
+	vertex(x + dilation * 3, y + dilation * 5);
+	vertex(x + dilation * 5, y + dilation * 3);
+	vertex(x + dilation * 7.5, y + dilation * 2.5);
+	vertex(x + dilation * 8, y + dilation * 4.5);
+	vertex(x + dilation * 6.7, y + dilation * 5);
+	vertex(x + dilation * 5, y + dilation * 6.5);
+	vertex(x + dilation * 5, y + dilation * 8.5);
+	vertex(x + dilation * 6, y + dilation * 9.8);
+	vertex(x + dilation * 8, y + dilation * 10);
+	vertex(x + dilation * 11, y + dilation * 10.5);
+	vertex(x + dilation * 13, y + dilation * 12);
+	vertex(x + dilation * 14.5, y + dilation * 13.5);
+	vertex(x + dilation * 14, y + dilation * 15);
+	vertex(x + dilation * 12, y + dilation * 17.5);
+	vertex(x + dilation * 9, y + dilation * 19);
+	vertex(x + dilation * 7.5, y + dilation * 18);
+	endShape(CLOSE);
+	return;
+}
 
-function drawLungSnail (x, y) {}
+function drawLungSnail (x, y) {
+	fill('#5a462e');
+	beginShape();
+	vertex(x + dilation * 5, y + dilation * 15);
+	vertex(x + dilation * 5, y + dilation * 9);
+	vertex(x + dilation * 8, y + dilation * 6);
+	vertex(x + dilation * 12, y + dilation * 6);
+	vertex(x + dilation * 15, y + dilation * 9);
+	vertex(x + dilation * 15, y + dilation * 13.5);
+	vertex(x + dilation * 13, y + dilation * 18);
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	vertex(x + dilation * 5, y + dilation * 15);
+	endShape(CLOSE);
+	fill('#9c9a81');
+	beginShape();
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	vertex(x + dilation * 2, y + dilation * 15);
+	vertex(x, y + dilation * 18.5);
+	vertex(x + dilation * 9, y + dilation * 18.5);
+	vertex(x + dilation * 13, y + dilation * 18.5);
+	vertex(x + dilation * 8.5, y + dilation * 15.5);
+	endShape(CLOSE);
+	line(x + dilation * 8.5, y + dilation * 15.5, x + dilation * 13, y + dilation * 11.5);
+	line(x + dilation * 13, y + dilation * 11.5, x + dilation * 10, y + dilation * 8.5);
+	line(x + dilation * 10, y + dilation * 8.5, x + dilation * 7.5, y + dilation * 9);
+	line(x + dilation * 7.5, y + dilation * 9, x + dilation * 7.75, y + dilation * 12);
+	line(x + dilation * 7.75, y + dilation * 12, x + dilation * 9, y + dilation * 13);
+	line(x + dilation * 9, y + dilation * 13, x + dilation * 10, y + dilation * 11);
+	line(x + dilation * 10, y + dilation * 11, x + dilation * 9, y + dilation * 10);
+	line(x + dilation * 9, y + dilation * 10, x + dilation * 8.75, y + dilation * 11);
+	return;
+}
 
 function drawLeech (x, y) {}
 
-function drawSowbug (x, y) {}
+function drawSowbug (x, y) {
+	x += 10; y += 20;
+	fill('#605545');
+	ellipse(x, y, 14, 22);
+	line(x, y - 10.5, x - 4, y - 16);
+	line(x, y - 10.5, x + 4, y - 16);
+	line(x - 4, y - 16, x - 6.5, y - 17);
+	line(x + 4, y - 16, x + 6.5, y - 17);
+	line(x - 5, y, x + 5, y);
+	line(x - 3, y - 4, x + 3, y - 4);
+	line(x - 3, y + 4, x + 3, y + 4);
+	return;
+}
