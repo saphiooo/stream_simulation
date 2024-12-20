@@ -176,7 +176,9 @@ function repaint () {
 	background(255);
 	
 	// simulation boxes
-	fill('#385cac');
+	if (pollution == 'None') { fill('#385cac'); }
+	else if (pollution == 'Moderate') { fill('#3c54a4'); }
+	else { fill('#2a3e52'); }
 	rect(W * BOX_PAD, H * BTN_PAD, W * MAIN_WIDTH, H * MAIN_HEIGHT, BOX_CORNER);
 	fill(0);
 	rect (W * BOX_PAD, H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - 0.5 * BTN_PAD), W * MAIN_WIDTH, H * (2 * BOX_HEIGHT + 3 * BOX_PAD + 0.5 * BTN_PAD), 0, 0, BOX_CORNER, BOX_CORNER);
