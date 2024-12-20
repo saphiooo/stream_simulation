@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 12.20.2024
+ * 12.12.2024
 */
 
 // CONSTANTS
@@ -190,6 +190,12 @@ function repaint () {
 		}
 	}
 	
+	// trap
+	if (state > RUNNING) {
+		drawTrap();
+	}
+	
+	// bugs
 	if (state >= RUNNING) {
 		setCoords();
 		for (let idx = 0; idx < 16; idx++) {
@@ -213,12 +219,11 @@ function repaint () {
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
 				}
 			}
+			// species
+			if (o.getAmt() > 0) {
+				species ++;
+			}
 		}
-	}
-	
-	// trap
-	if (state > RUNNING) {
-		drawTrap();
 	}
 	
 	// side panel indicators
@@ -232,6 +237,7 @@ function repaint () {
 	text(time + ' minutes', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.5) * H);
 	text(species, BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 9.5) * H);
 	text(abundance, BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 11.5) * H);
+	species = 0;
 	abundance = 0;
 	
 	return;
@@ -347,7 +353,7 @@ function setCoords () {
 		}
 		// box coords
 		diff = o.getAmt() - o.getLenBoxCoords();
-		let r = o.box[0] + 2; c = o.box[1] + 1;
+		let r = o.box[0]; c = o.box[1] + 1;
 		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
 			// old organisms
 			let l = o.getBoxCoords(i);
@@ -355,17 +361,15 @@ function setCoords () {
 			l[1] += Math.random() * 10 - 5;
 			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH)); 
 			l[0] = Math.min(l[0], W * ((c - 2) * BOX_PAD + c * BOX_WIDTH));
-			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD)); 
-			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) - BTN_PAD + BOX_HEIGHT));
+			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * r * BOX_HEIGHT + (r + 1) * BOX_PAD); 
+			l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * (r + 1) * BOX_HEIGHT + r * BOX_PAD);
 			o.setBoxCoords(i, l);
-			//rect(W * ((j + 1) * BOX_PAD + (j - 1) * BOX_WIDTH), H * (MAIN_HEIGHT - i * (BOX_HEIGHT + BOX_PAD) + BTN_PAD), W * BOX_WIDTH, H * BOX_HEIGHT, BOX_CORNER);
-			
 		}
 		
 		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
 			// new organisms
 			let x = W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH + BOX_WIDTH/2) + Math.random() * W * BOX_WIDTH - W * BOX_WIDTH/2;
-			let y = H * (MAIN_HEIGHT - r * (BOX_HEIGHT + BOX_PAD) + BTN_PAD + BOX_HEIGHT/2) + Math.random() * H * BOX_HEIGHT - H * BOX_HEIGHT/2;
+			let y = H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD + (r + 1) * BOX_HEIGHT + r * BOX_PAD) - Math.random() * H * BOX_HEIGHT;
 			o.addBoxCoords([x, y]);
 		}
 	}
@@ -694,7 +698,39 @@ function drawGillSnail (x, y) {
 	return;
 }
 
-function drawDobsonfly (x, y) {}
+function drawDobsonfly (x, y) {
+	fill('#e2a657');
+	let dilation = 2;
+	beginShape();
+	vertex(x + dilation * 11, y + dilation * 5);
+	vertex(x + dilation * 11.5, y + dilation * 5.5);
+	vertex(x + dilation * 11, y + dilation * 6);
+	vertex(x + dilation * 11, y + dilation * 8);
+	vertex(x + dilation * 10.25, y + dilation * 17);
+	vertex(x + dilation * 9.75, y + dilation * 17);
+	vertex(x + dilation * 9, y + dilation * 8);
+	vertex(x + dilation * 9, y + dilation * 6);
+	vertex(x + dilation * 8.5, y + dilation * 5.5);
+	vertex(x + dilation * 9, y + dilation * 5);
+	vertex(x + dilation * 11, y + dilation * 5);
+	endShape(CLOSE);
+	fill('#936638');
+	beginShape();
+	vertex(x + dilation * 11, y + dilation * 8);
+	vertex(x + dilation * 12, y + dilation * 10);
+	vertex(x + dilation * 13, y + dilation * 15);
+	vertex(x + dilation * 12, y + dilation * 17.5);
+	vertex(x + dilation * 11, y + dilation * 17.5);
+	vertex(x + dilation * 10, y + dilation * 15);
+	vertex(x + dilation * 9, y + dilation * 17.5);
+	vertex(x + dilation * 8, y + dilation * 17.5);
+	vertex(x + dilation * 7, y + dilation * 15);
+	vertex(x + dilation * 8, y + dilation * 10);
+	vertex(x + dilation * 9, y + dilation * 8);
+	vertex(x + dilation * 11, y + dilation * 8);
+	endShape(CLOSE);
+	return;
+}
 
 function drawCrayfish (x, y) {}
 
