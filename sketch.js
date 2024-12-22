@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 12.20.2024
+ * 12.21.2024
 */
 
 // CONSTANTS
@@ -225,7 +225,10 @@ function repaint () {
 			}
 			// draw 
 			for (let reps = 0; reps < o.getAmt(); reps += 2) {
-				o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
+				if (o.getCoords(reps)[0] > W * 2 * BOX_PAD && 
+						o.getCoords(reps)[0] < W * MAIN_WIDTH) {
+					o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
+				}
 				if (state > RUNNING) {
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
 				}
@@ -258,7 +261,7 @@ function go () {
 	pollution = selPollution.selected();
 	if (pollution == 'None' || pollution == 'Moderate' || pollution == 'High') {
 		state = RUNNING;
-		frameRate(3);
+		frameRate(60);
 		btnGo.style('background-color', '#2dc43f');
 		btnOpen.removeAttribute('disabled');
 		setAmts(pollution);
@@ -308,17 +311,17 @@ function setAmts (pollution) {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
 				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 3 + 3)); }
-				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
-				else { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 3)); }
+				else { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
 			}			
 		}
 	}
 	else if (pollution == 'Moderate') {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
-				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 3 + 1)); }
-				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 2)); }
-				else { o.setAmt(Math.floor(Math.random() * 4 + 3)); }
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 1.5)); }
+				else { o.setAmt(Math.floor(Math.random() * 4.5 + 3)); }
 			}
 		}
 	}
@@ -347,16 +350,22 @@ function setCoords () {
 		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
 			// old organisms
 			let l = o.getCoords(i);
-			l[0] += Math.random() * 60 - 30;
-			l[1] += Math.random() * 60 - 30;
-			l[0] = Math.max(l[0], W * 2 * BOX_PAD); l[0] = Math.min(l[0], W * MAIN_WIDTH - 3 * W * BOX_PAD);
+			l[0] -= Math.random() * 5;
+			l[1] += Math.random() * 1.2 - 0.6;
 			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 3 * BOX_HEIGHT - 3 * BOX_PAD));
-			o.setCoords(i, l);
+			if (l[0] < W * BOX_PAD) {
+				let x = W * (MAIN_WIDTH + 3 * BOX_PAD);
+				let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
+				o.setCoords(i, [x, y]);
+			}
+			else {
+				o.setCoords(i, l);
+			}
 		}
 		
 		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
 			// new organisms
-			let x = Math.random() * W * MAIN_WIDTH + W * BOX_PAD;
+			let x = Math.random() * W * 2 * MAIN_WIDTH;
 			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
 			o.addCoords([x, y]);
 			console.log(o.coords);
@@ -367,8 +376,8 @@ function setCoords () {
 		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
 			// old organisms
 			let l = o.getBoxCoords(i);
-			l[0] += Math.random() * 10 - 5;
-			l[1] += Math.random() * 10 - 5;
+			l[0] += Math.random() * 1.2 - 0.6;
+			l[1] += Math.random() * 1.2 - 0.6;
 			l[0] = Math.max(l[0], W * ((c + 1) * BOX_PAD + (c - 1) * BOX_WIDTH) + 20); 
 			l[0] = Math.min(l[0], W * ((c - 2) * BOX_PAD + c * BOX_WIDTH) - 20);
 			l[1] = Math.max(l[1], H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD) + H * r * BOX_HEIGHT + (r + 1) * BOX_PAD + 20); 
@@ -1013,7 +1022,37 @@ function drawLungSnail (x, y) {
 	return;
 }
 
-function drawLeech (x, y) {}
+function drawLeech (x, y) {
+	fill('#402f24');
+	beginShape();
+	vertex(x + dilation * 7.5, y + dilation * 18);
+	vertex(x + dilation * 10, y + dilation * 17);
+	vertex(x + dilation * 12, y + dilation * 15);
+	vertex(x + dilation * 12, y + dilation * 13);
+	vertex(x + dilation * 10, y + dilation * 12.5);
+	vertex(x + dilation * 7.5, y + dilation * 12.4);
+	vertex(x + dilation * 5, y + dilation * 11.5);
+	vertex(x + dilation * 3, y + dilation * 10);
+	vertex(x + dilation * 2.5, y + dilation * 7.5);
+	vertex(x + dilation * 3, y + dilation * 5);
+	vertex(x + dilation * 5, y + dilation * 3);
+	vertex(x + dilation * 7.5, y + dilation * 2.5);
+	vertex(x + dilation * 8, y + dilation * 4.5);
+	vertex(x + dilation * 6.7, y + dilation * 5);
+	vertex(x + dilation * 5, y + dilation * 6.5);
+	vertex(x + dilation * 5, y + dilation * 8.5);
+	vertex(x + dilation * 6, y + dilation * 9.8);
+	vertex(x + dilation * 8, y + dilation * 10);
+	vertex(x + dilation * 11, y + dilation * 10.5);
+	vertex(x + dilation * 13, y + dilation * 12);
+	vertex(x + dilation * 14.5, y + dilation * 13.5);
+	vertex(x + dilation * 14, y + dilation * 15);
+	vertex(x + dilation * 12, y + dilation * 17.5);
+	vertex(x + dilation * 9, y + dilation * 19);
+	vertex(x + dilation * 7.5, y + dilation * 18);
+	endShape(CLOSE);
+	return;
+}
 
 function drawSowbug (x, y) {
 	x += 10; y += 20;
