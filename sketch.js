@@ -226,7 +226,7 @@ function repaint () {
 			// draw 
 			for (let reps = 0; reps < o.getAmt(); reps ++) {
 				if (o.getCoords(reps)[0] > W * 2 * BOX_PAD && 
-						o.getCoords(reps)[0] < W * MAIN_WIDTH) {
+						o.getCoords(reps)[0] < W * MAIN_WIDTH - W * BOX_PAD) {
 					o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
 				}
 			}
@@ -259,7 +259,7 @@ function repaint () {
 // BUTTON FUNCTIONS
 // go button
 function go () {
-	console.log('Simulation running.')
+	// console.log('Simulation running.')
 	pollution = selPollution.selected();
 	if (pollution == 'None' || pollution == 'Moderate' || pollution == 'High') {
 		state = RUNNING;
@@ -276,7 +276,7 @@ function go () {
 
 // open trap button
 function openTrap () {
-	console.log('Opened trap.');
+	// console.log('Opened trap.');
 	if (state == RUNNING) {
 		state = TRAP_OPEN;
 		drawTrap();
@@ -289,7 +289,7 @@ function openTrap () {
 
 // reset button
 function reset () {
-	console.log('Reset simulation.');
+	// console.log('Reset simulation.');
 	state = STOPPED;
 	time = 0;
 	species = 0;
@@ -369,7 +369,7 @@ function setCoords () {
 			let x = Math.random() * W * 3 * MAIN_WIDTH;
 			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
 			o.addCoords([x, y]);
-			console.log(o.coords);
+			// console.log(o.coords);
 		}
 		// box coords
 		diff = 2 * o.getAmt() - o.getLenBoxCoords();
