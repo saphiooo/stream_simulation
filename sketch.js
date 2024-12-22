@@ -32,7 +32,7 @@ const BTN_XPOS = MAIN_WIDTH + BTN_PAD;
 const BTN_FONT_SIZE = '18px';
 const HEAD_FONT_SIZE = 18;
 const TEXT_FONT_SIZE = 14;
-const dilation = 1.5;
+const dilation = 1.3;
 // buttons/dropdowns
 let selPollution;
 let btnReset;
@@ -161,7 +161,7 @@ function setup() {
 // DRAW
 function draw() {
 	if (state == TRAP_OPEN) {
-		if (time < 15) {
+		if (time < 60) {
 			time ++;
 		}
 	}
@@ -208,11 +208,11 @@ function repaint () {
 		for (let idx = 0; idx < 16; idx++) {
 			o = organisms[idx];
 			i = o.box[0] + 1; j = o.box[1] + 1;
-			// text
+			let tempAmt = o.getAmt();
+			
 			if (state > RUNNING) {
 				fill(0);
 				textSize(TEXT_FONT_SIZE + 5);
-				let tempAmt = o.getAmt();
 				const multipliers = [1.25, 1.5, 2];
 				tempAmt *= multipliers[Math.floor(Math.random() + 1)];
 				tempAmt = Math.floor(tempAmt);
@@ -224,12 +224,14 @@ function repaint () {
 				}
 			}
 			// draw 
-			for (let reps = 0; reps < o.getAmt(); reps += 2) {
+			for (let reps = 0; reps < o.getAmt(); reps ++) {
 				if (o.getCoords(reps)[0] > W * 2 * BOX_PAD && 
 						o.getCoords(reps)[0] < W * MAIN_WIDTH) {
 					o.display(o.getCoords(reps)[0], o.getCoords(reps)[1]);
 				}
-				if (state > RUNNING) {
+			}
+			if (state > RUNNING) {
+				for (let reps = 0; reps < tempAmt; reps ++) {
 					o.display(o.getBoxCoords(reps)[0], o.getBoxCoords(reps)[1]);
 				}
 			}
@@ -319,7 +321,7 @@ function setAmts (pollution) {
 	else if (pollution == 'Moderate') {
 		for (let o of organisms) {
 			if (o.getAmt() == 0) {
-				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 2 + 2)); }
+				if (o.sensitivity == 2) { o.setAmt(Math.floor(Math.random() * 4)); }
 				else if (o.sensitivity == 1) { o.setAmt(Math.floor(Math.random() * 3 + 1.5)); }
 				else { o.setAmt(Math.floor(Math.random() * 4.5 + 3)); }
 			}
@@ -347,14 +349,14 @@ function setCoords () {
 	for (let o of organisms) {
 		// simulation coords
 		let diff = o.getAmt() - o.getLenCoords();
-		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
+		for (let i = 0; i < o.getLenCoords(); i++) {
 			// old organisms
 			let l = o.getCoords(i);
 			l[0] -= Math.random() * 5;
 			l[1] += Math.random() * 1.2 - 0.6;
 			l[1] = Math.max(l[1], H * 2 * BOX_PAD); l[1] = Math.min(l[1], H * (MAIN_HEIGHT - 3 * BOX_HEIGHT - 3 * BOX_PAD));
-			if (l[0] < W * BOX_PAD) {
-				let x = W * (MAIN_WIDTH + 3 * BOX_PAD);
+			if (l[0] <= 0) {
+				let x = W * 3 * MAIN_WIDTH;
 				let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
 				o.setCoords(i, [x, y]);
 			}
@@ -362,18 +364,17 @@ function setCoords () {
 				o.setCoords(i, l);
 			}
 		}
-		
 		for (let i = o.getAmt() - diff; i < o.getAmt(); i++) {
 			// new organisms
-			let x = Math.random() * W * 2 * MAIN_WIDTH;
+			let x = Math.random() * W * 3 * MAIN_WIDTH;
 			let y = Math.random() * H * (MAIN_HEIGHT - 2 * BOX_HEIGHT - BOX_PAD);
 			o.addCoords([x, y]);
 			console.log(o.coords);
 		}
 		// box coords
-		diff = o.getAmt() - o.getLenBoxCoords();
+		diff = 2 * o.getAmt() - o.getLenBoxCoords();
 		let r = o.box[0]; c = o.box[1] + 1;
-		for (let i = 0; i < o.getAmt() - Math.max(Math.abs(diff)); i++) {
+		for (let i = 0; i < o.getLenBoxCoords(); i++) {
 			// old organisms
 			let l = o.getBoxCoords(i);
 			l[0] += Math.random() * 1.2 - 0.6;
