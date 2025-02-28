@@ -1,5 +1,9 @@
 # Stream Simulation
 
+## 02.28.2025 Update
+
+- Implemented a time slider to vary the sampling time, in minutes, from 0 to 500. The sampling time cannot be changed when the sampling process has begun, although the slider may move.
+
 ## About
 
 Stream Simulation is p5.js adaption of the Virtual Biology Labs Diversity Ecology model 2: Stream Simulation. The interface allows the user to start and stop sampling from a simulated river with varying amounts of pollution, and view the abundance of each species and the total number of species. 
