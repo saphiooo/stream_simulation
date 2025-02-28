@@ -1,7 +1,7 @@
 /* Biodiversity Ecology - Estimating Stream Diversity Model
  * Adapted from Virtual Lab Biology's Stream Diversity Model Simulation
  * Adapted by Sophia Wang
- * 12.21.2024
+ * 02.28.2024
 */
 
 // CONSTANTS
@@ -11,8 +11,9 @@ const MODERATE = 1;
 const LOW = 0;
 let pollution;
 // sampling details
-const SAMP_TIME = 60;
-let time = 0;
+const MAX_TIME = 500;
+let time = MAX_TIME/2;
+let sentMsg = false;
 let species = 0;
 let abundance = 0;
 // window/box sizing ratios
@@ -33,11 +34,12 @@ const BTN_FONT_SIZE = '18px';
 const HEAD_FONT_SIZE = 18;
 const TEXT_FONT_SIZE = 14;
 const dilation = 1.3;
-// buttons/dropdowns
+// buttons/dropdowns/sliders
 let selPollution;
 let btnReset;
 let btnGo;
 let btnOpen;
+let timeSldr;
 
 // STATES
 const STOPPED = 0;
@@ -100,22 +102,22 @@ function setup() {
 	
 	// buttons
 	btnReset = createButton('Reset');
-	btnReset.position(BTN_XPOS * W, BTN_PAD * H)
-	btnReset.style('font-size', BTN_FONT_SIZE)
-	btnReset.style('height', BTN_HEIGHT * H + 'px')
-	btnReset.style('width', BTN_WIDTH * W + 'px')
+	btnReset.position(BTN_XPOS * W, BTN_PAD * H);
+	btnReset.style('font-size', BTN_FONT_SIZE);
+	btnReset.style('height', BTN_HEIGHT * H + 'px');
+	btnReset.style('width', BTN_WIDTH * W + 'px');
 	btnReset.mousePressed(reset);
 	btnGo = createButton('Go');
 	btnGo.position(BTN_XPOS * W, (BTN_PAD * 2 + BTN_HEIGHT) * H)
-	btnGo.style('font-size', BTN_FONT_SIZE)
-	btnGo.style('height', BTN_HEIGHT * H + 'px')
-	btnGo.style('width', BTN_WIDTH * W + 'px')
+	btnGo.style('font-size', BTN_FONT_SIZE);
+	btnGo.style('height', BTN_HEIGHT * H + 'px');
+	btnGo.style('width', BTN_WIDTH * W + 'px');
 	btnGo.mousePressed(go);
 	btnOpen = createButton('Open Trap');
 	btnOpen.position(BTN_XPOS * W, (BTN_PAD * 3 + BTN_HEIGHT * 2) * H)
-	btnOpen.style('font-size', BTN_FONT_SIZE)
-	btnOpen.style('height', BTN_HEIGHT * H + 'px')
-	btnOpen.style('width', BTN_WIDTH * W + 'px')
+	btnOpen.style('font-size', BTN_FONT_SIZE);
+	btnOpen.style('height', BTN_HEIGHT * H + 'px');
+	btnOpen.style('width', BTN_WIDTH * W + 'px');
 	btnOpen.mousePressed(openTrap);
 	btnOpen.attribute('disabled', '');
 	
@@ -126,10 +128,15 @@ function setup() {
 	selPollution.option('High');
 	pollution = 'None';
 	selPollution.selected(pollution);
-	selPollution.position(BTN_XPOS * W, (BTN_PAD * 4 + BTN_HEIGHT * 4.5) * H)
-	selPollution.style('font-size', BTN_FONT_SIZE/2)
-	selPollution.style('height', BTN_HEIGHT * H + 'px')
-	selPollution.style('width', BTN_WIDTH * W + 'px')
+	selPollution.position(BTN_XPOS * W, (BTN_PAD * 4 + BTN_HEIGHT * 4.5) * H);
+	selPollution.style('font-size', BTN_FONT_SIZE/2);
+	selPollution.style('height', BTN_HEIGHT * H + 'px');
+	selPollution.style('width', BTN_WIDTH * W + 'px');
+  
+    // slider
+    timeSldr = createSlider(0, MAX_TIME, round(MAX_TIME/2), 0);
+    timeSldr.position(BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.5) * H);
+    timeSldr.size(100);
 	
 	// organisms
 	caddisfly = new Organism('Caddisfly', 2, drawCaddisfly, 0);
@@ -160,11 +167,6 @@ function setup() {
 
 // DRAW
 function draw() {
-	if (state == TRAP_OPEN) {
-		if (time < 60) {
-			time ++;
-		}
-	}
 	repaint();
 	return;
 }
@@ -246,7 +248,14 @@ function repaint () {
 	text('Total Species', BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 8.5) * H);
 	text('Abundance', BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 10.5) * H);
 	textSize(TEXT_FONT_SIZE);
-	text(time + ' minutes', BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.5) * H);
+    if (state == STOPPED) { time = round(timeSldr.value()); }
+    else if (state == RUNNING && round(timeSldr.value()) != time && !sentMsg) { 
+      console.log("Your simulation is running!");
+      sentMsg = true; 
+    }
+    let timeUnits = ' minutes';
+    if (time == 1) { timeUnits = ' minute'; }
+	text(time + timeUnits, BTN_XPOS * W, (BTN_PAD * 6 + BTN_HEIGHT * 7.25) * H);
 	text(species, BTN_XPOS * W, (BTN_PAD * 7 + BTN_HEIGHT * 9.5) * H);
 	text(abundance, BTN_XPOS * W, (BTN_PAD * 8 + BTN_HEIGHT * 11.5) * H);
 	species = 0;
@@ -270,6 +279,8 @@ function go () {
 		setCoords();
 		repaint();
 		selPollution.disable();
+        time = round(timeSldr.value());
+        sentMsg = false;
 	}
 	return;
 }
@@ -294,13 +305,14 @@ function reset () {
 	time = 0;
 	species = 0;
 	abundance = 0;
-	frameRate(0);
 	btnGo.style('background-color', null);
 	btnOpen.style('background-color', null)
 	btnOpen.attribute('disabled', '');
 	btnGo.removeAttribute('disabled');
 	selPollution.enable();
 	selPollution.selected(pollution);
+    sentMsg = false;
+    time = round(timeSldr.value());
 	for (let o of organisms) { o.resetAmts(); }
 	draw();
 	return;
@@ -341,6 +353,11 @@ function setAmts (pollution) {
 			o.setAmt(0);
 		}
 	}
+    
+    for (let o of organisms) {
+      o.setAmt(round(o.getAmt() * 1.0 * timeSldr.value()/MAX_TIME));
+    }
+  
 	return;
 }
 
